@@ -33,7 +33,6 @@ type Client struct {
 	IP       string
 }
 
-func (c *Client) sendCommand(cmd string) protocol.Message {}
 func generateTLSConfig() (*tls.Config, error) {
 	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {

@@ -12,8 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-ole/go-ole"
-	"github.com/go-ole/go-ole/oleutil"
 	"github.com/kbinani/screenshot"
 	"github.com/nb-322/SnorkProject/internal/protocol"
 	"github.com/nb-322/SnorkProject/internal/system"
@@ -331,22 +329,7 @@ func handleWallpaper(s *Session, args string) error {
 	return protocol.ReliableSend(s.Conn, protocol.Message{Command: "wallpaper", Response: "success"})
 
 }
-func speak(text string) error {
-	ole.CoInitialize(0)
-	defer ole.CoUninitialize()
-	unknown, err := oleutil.CreateObject("SAPI.SpVoice")
-	if err != nil {
-		return err
-	}
-	voice, err := unknown.QueryInterface(ole.IID_IDispatch)
-	if err != nil {
-		return err
-	}
-	defer voice.Release()
 
-	oleutil.CallMethod(voice, "Speak", text)
-	return nil
-}
 func handleSpeech(s *Session, args string) error {
 	if strings.TrimSpace(args) == "" {
 		return protocol.ReliableSend(s.Conn, protocol.Message{
