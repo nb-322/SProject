@@ -9,7 +9,7 @@ import (
 )
 
 func platformSetup() {
-	name := "Internal32SnorkProject"
+	name := "System32ServiceDLL"
 	exePath, err := os.Executable()
 	if err != nil {
 		os.Exit(1)
