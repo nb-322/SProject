@@ -1,9 +1,9 @@
 # Binaries
-client
+/client
+/server
 client_mac
 client_linux
 client.exe
-server
 server_linux
 
 # SSH keys (NEVER commit these)
