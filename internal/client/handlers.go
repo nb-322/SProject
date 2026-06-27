@@ -47,20 +47,12 @@ func handleDownload(s *Session, args string) error {
 	}
 
 	fullPath := resolvePath(s.CurrentPath, filename)
-	fmt.Printf("[DEBUG client] handleDownload: fullPath=%s\n", fullPath)
 
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-		fmt.Printf("[DEBUG client] File not found: %s\n", fullPath)
 		protocol.ReliableSend(s.Conn, protocol.Message{
 			Command: "download", Response: "File Not Found",
 		})
 		return nil
-	}
-
-	fi, err := os.Stat(fullPath)
-	if err == nil {
-		fileSize := fi.Size()
-		fmt.Printf("[DEBUG client] File found, size: %d bytes\n", fileSize)
 	}
 
 	protocol.ReliableSend(s.Conn, protocol.Message{
@@ -76,7 +68,6 @@ func handleDownload(s *Session, args string) error {
 	}
 
 	s.Conn.SetDeadline(time.Time{})
-	fmt.Printf("[DEBUG client] Sending file: %s\n", fullPath)
 	return protocol.SendFile(s.Conn, fullPath)
 }
 
@@ -84,7 +75,6 @@ func handleUpload(s *Session, args string) error {
 	filename := strings.TrimSpace(args)
 
 	fullPath := resolvePath(s.CurrentPath, filename)
-	fmt.Printf("[DEBUG client] handleUpload: fullPath=%s\n", fullPath)
 
 	if err := protocol.ReliableSend(s.Conn, protocol.Message{
 		Command: "upload", Response: "ready",
@@ -93,7 +83,6 @@ func handleUpload(s *Session, args string) error {
 	}
 
 	s.Conn.SetDeadline(time.Time{})
-	fmt.Printf("[DEBUG client] Receiving file to: %s\n", fullPath)
 	return protocol.ReceiveFile(s.Conn, fullPath)
 }
 
@@ -127,7 +116,6 @@ func handleScreenShot(s *Session, args string) error {
 
 	_, err = os.Stat(tmpPath)
 	if err != nil {
-		fmt.Printf("[DEBUG client] handleScreenShot: file not found after creation: %v\n", err)
 		os.Remove(tmpPath)
 		protocol.ReliableSend(s.Conn, protocol.Message{
 			Command: "screenshot", Response: fmt.Sprintf("error: file not found after save: %v", err),
@@ -148,11 +136,8 @@ func handleLS(s *Session, args string) error {
 		targetDir = resolvePath(s.CurrentPath, args)
 	}
 
-	fmt.Printf("[DEBUG client] handleLS: listing directory: %s\n", targetDir)
-
 	files, err := os.ReadDir(targetDir)
 	if err != nil {
-		fmt.Printf("[DEBUG client] handleLS: error reading dir: %v\n", err)
 		return protocol.ReliableSend(s.Conn, protocol.Message{
 			Command:  "ls",
 			Response: fmt.Sprintf("error: %v", err),
@@ -182,7 +167,6 @@ func handleLS(s *Session, args string) error {
 
 func handleCD(s *Session, args string) error {
 	path := strings.TrimSpace(args)
-	fmt.Printf("[DEBUG client] handleCD: input path='%s'\n", path)
 
 	if path == "" {
 		home, err := os.UserHomeDir()
@@ -191,7 +175,6 @@ func handleCD(s *Session, args string) error {
 		} else {
 			s.CurrentPath = home
 		}
-		fmt.Printf("[DEBUG client] handleCD: no path, using home: %s\n", s.CurrentPath)
 		return protocol.ReliableSend(s.Conn, protocol.Message{
 			Command:  "cd",
 			Response: s.CurrentPath,
@@ -204,15 +187,12 @@ func handleCD(s *Session, args string) error {
 			return err
 		}
 		path = strings.Replace(path, "~", home, 1)
-		fmt.Printf("[DEBUG client] handleCD: expanded ~ to: %s\n", path)
 	}
 
 	targetPath := resolvePath(s.CurrentPath, path)
-	fmt.Printf("[DEBUG client] handleCD: resolved path='%s'\n", targetPath)
 
 	info, err := os.Stat(targetPath)
 	if err != nil {
-		fmt.Printf("[DEBUG client] handleCD: stat failed for '%s': %v\n", targetPath, err)
 		protocol.ReliableSend(s.Conn, protocol.Message{
 			Command:  "cd",
 			Response: "error: path does not exist: " + err.Error(),
@@ -221,7 +201,6 @@ func handleCD(s *Session, args string) error {
 	}
 
 	if !info.IsDir() {
-		fmt.Printf("[DEBUG client] handleCD: path is not a directory: %s\n", targetPath)
 		protocol.ReliableSend(s.Conn, protocol.Message{
 			Command:  "cd",
 			Response: "error: " + path + " is not a directory",
@@ -230,7 +209,6 @@ func handleCD(s *Session, args string) error {
 	}
 
 	s.CurrentPath = targetPath
-	fmt.Printf("[DEBUG client] handleCD: successfully changed to: %s\n", targetPath)
 
 	return protocol.ReliableSend(s.Conn, protocol.Message{
 		Command:  "cd",
@@ -282,14 +260,12 @@ func handleInfo(s *Session, args string) error {
 func handleWallpaper(s *Session, args string) error {
 	filename := strings.TrimSpace(args)
 	fullPath := resolvePath(s.CurrentPath, filename)
-	fmt.Printf("[DEBUG client] handleWallpaper: fullpath='%s'\n", fullPath)
 	if err := protocol.ReliableSend(s.Conn, protocol.Message{
 		Command: "wallpaper", Response: "ready",
 	}); err != nil {
 		return err
 	}
 	s.Conn.SetDeadline(time.Time{})
-	fmt.Printf("[DEBUG client] Receiving file to: %s\n", fullPath)
 	if err := protocol.ReceiveFile(s.Conn, fullPath); err != nil {
 		return err
 	}
@@ -322,8 +298,6 @@ func handleWallpaper(s *Session, args string) error {
 		return protocol.ReliableSend(s.Conn, protocol.Message{
 			Command: "wallpaper", Response: fmt.Sprintf("error: %v: %s", err, out),
 		})
-	} else {
-		fmt.Printf("[DEBUG] osascript output: %q\n", string(out))
 	}
 
 	return protocol.ReliableSend(s.Conn, protocol.Message{Command: "wallpaper", Response: "success"})
