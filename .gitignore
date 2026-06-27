@@ -1,0 +1,25 @@
+# Binaries
+client
+client_mac
+client_linux
+client.exe
+server
+server_linux
+
+# SSH keys (NEVER commit these)
+*.pem
+*.key
+sshID*
+id_rsa*
+id_ed25519*
+
+# Test/temp files
+satan.png
+satan_upload_result.png
+screenshot-*.png
+
+# macOS
+.DS_Store
+
+# GoLand
+.idea/

@@ -1,0 +1,20 @@
+VPS ?= user@your-vps-here
+SERVER_ADDR ?= your-server:4444
+build-server:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o server_linux ./cmd/server/
+
+build-client-linux:
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o client_linux ./cmd/client/
+
+build-client-windows:
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.serverAddr=$(SERVER_ADDR)" ./cmd/client/
+deploy-server: build-server
+	scp server_linux $(VPS):/root/server.new
+	ssh $(VPS) "mv /root/server.new /root/server"
+
+build-client-mac:
+	go build -o client_mac ./cmd/client/
+
+clients: build-client-linux build-client-windows build-client-mac
+
+deploy: deploy-server clients
