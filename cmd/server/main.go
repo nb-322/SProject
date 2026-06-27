@@ -2,6 +2,9 @@ package main
 
 import (
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/nb-322/SnorkProject/internal/server"
 )
@@ -14,5 +17,8 @@ func main() {
 	go s.Serve()
 	cli := server.NewCLI(s)
 	go cli.Run()
-	select {}
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
+	<-ch
+
 }
