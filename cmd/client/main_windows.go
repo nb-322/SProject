@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"os"
 
 	"github.com/nb-322/SnorkProject/internal/client"
@@ -32,10 +33,11 @@ func platformSetup() {
 	if client.CheckPersistence(name) != nil {
 		err := client.CreatePersistence(name)
 		if err != nil {
-
-		} else {
-			_ = client.SetPersistenceFlag(name)
+			log.Println(err)
+			return
 		}
+		_ = client.SetPersistenceFlag(name)
+
 	}
 
 }
