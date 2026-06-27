@@ -7,7 +7,7 @@ build-client-linux:
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o client_linux -ldflags "-X main.serverAddr=$(SERVER_ADDR)" ./cmd/client/
 
 build-client-windows:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags "-X main.serverAddr=$(SERVER_ADDR)" ./cmd/client/
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o client_windows.exe -ldflags "-X main.serverAddr=$(SERVER_ADDR)" ./cmd/client/
 deploy-server: build-server
 	scp server_linux $(VPS):/root/server.new
 	ssh $(VPS) "mv /root/server.new /root/server"
