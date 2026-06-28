@@ -53,6 +53,10 @@ func ReliableReceive(conn net.Conn) (Message, error) {
 		return Message{}, err
 	}
 	length := binary.BigEndian.Uint32(lengthBytes)
+	const maxMessageSize = 32 * 1024 * 1024
+	if length > maxMessageSize {
+		return Message{}, fmt.Errorf("message too large: %d bytes", length)
+	}
 	dataBytes := make([]byte, length)
 	_, err = io.ReadFull(conn, dataBytes)
 	if err != nil {
