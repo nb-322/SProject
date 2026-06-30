@@ -1,96 +1,96 @@
 # SnorkProject
 
-Кроссплатформенный Remote Access Tool с шифрованием трафика, удалённым управлением файловой системой, захватом экрана и механизмом персистентности. Написан на Go с нуля без использования сторонних RAT-фреймворков.
+A cross-platform Remote Access Tool with traffic encryption, remote file system management, screenshot capture, and persistence mechanism. Written in Go from scratch without using third-party RAT frameworks.
 
-**Стек:** Go 1.26 · TLS (ECDSA P-256, self-signed) · kbinani/screenshot · golang.org/x/sys
+**Stack:** Go 1.26 · TLS (ECDSA P-256, self-signed) · kbinani/screenshot · golang.org/x/sys
 
-
----
-
-## Возможности
-
-- Шифрованное соединение (TLS) — трафик защищён на транспортном уровне без необходимости ручной настройки сертификатов
-- Управление несколькими клиентами одновременно через интерактивный CLI
-- Удалённое выполнение команд shell (`cmd /c` на Windows, `sh -c` на Unix)
-- Двусторонняя передача файлов (upload / download)
-- Захват скриншота и получение на сервер
-- Смена обоев рабочего стола (Windows, macOS, Linux GNOME)
-- Text-to-Speech на стороне клиента (Windows)
-- Персистентность на Windows: копирование в `C:\ProgramData`, запуск через Task Scheduler с уровнем `HIGHEST` при входе пользователя
-- Кросс-компиляция под Windows / Linux / macOS из одного Makefile
 
 ---
 
-## Сборка
+## Features
 
-Адрес сервера задаётся на этапе компиляции через `-ldflags`, бинарник не требует конфигурационных файлов.
+- Encrypted connection (TLS) — traffic is protected at the transport layer without the need for manual certificate configuration
+- Managing multiple clients simultaneously through an interactive CLI
+- Remote shell command execution (`cmd /c` on Windows, `sh -c` on Unix)
+- Bidirectional file transfer (upload / download)
+- Screenshot capture and retrieval to server
+- Desktop wallpaper change (Windows, macOS, Linux GNOME)
+- Text-to-Speech on the client side (Windows)
+- Persistence on Windows: copying to `C:\ProgramData`, running via Task Scheduler with `HIGHEST` privilege level at user login
+- Cross-compilation for Windows / Linux / macOS from a single Makefile
+
+---
+
+## Build
+
+The server address is set at compile time via `-ldflags`; the binary does not require configuration files.
 
 ```bash
-# Сервер (Linux amd64)
+# Server (Linux amd64)
 make build-server
 
-# Клиенты под все платформы
+# Clients for all platforms
 make clients SERVER_ADDR=1.2.3.4:4444
 
-# Деплой сервера на VPS + сборка всех клиентов
+# Deploy server to VPS + build all clients
 make deploy VPS=root@1.2.3.4 SERVER_ADDR=1.2.3.4:4444
 ```
 
-| Таргет                  | Результат                                   |
+| Target                  | Result                                      |
 |-------------------------|---------------------------------------------|
 | `build-server`          | `server_linux` (CGO_ENABLED=0)              |
 | `build-client-linux`    | `client_linux`                              |
-| `build-client-windows`  | `client.exe` (без окна консоли, `-H=windowsgui`) |
+| `build-client-windows`  | `client.exe` (no console window, `-H=windowsgui`) |
 | `build-client-mac`      | `client_mac`                                |
-| `clients`               | Все три клиента сразу                       |
-| `deploy`                | Сборка + scp сервера на VPS                 |
+| `clients`               | All three clients at once                   |
+| `deploy`                | Build + scp server to VPS                   |
 
 ---
 
-## Использование
+## Usage
 
-**Запуск сервера:**
+**Running the server:**
 ```bash
 ./server_linux
 ```
-Сервер слушает порт `4444`. При подключении нового клиента выводится уведомление в консоль.
+The server listens on port `4444`. When a new client connects, a notification is printed to the console.
 
-**CLI оператора — без активного клиента:**
+**Operator CLI — without an active client:**
 
-| Команда   | Описание                     |
+| Command   | Description                     |
 |-----------|------------------------------|
-| `list`    | Список подключённых клиентов |
-| `use <N>` | Выбрать клиента по номеру    |
-| `exit`    | Завершить работу сервера     |
+| `list`    | List of connected clients |
+| `use <N>` | Select a client by number    |
+| `exit`    | Shut down the server     |
 
-**CLI оператора — с активным клиентом:**
+**Operator CLI — with an active client:**
 
-| Команда                 | Описание                                           |
+| Command                 | Description                                           |
 |-------------------------|----------------------------------------------------|
-| `info`                  | Username, hostname, MAC-адрес, системное время     |
-| `ls [путь]`             | Содержимое директории                              |
-| `cd <путь>`             | Сменить рабочую директорию                         |
-| `download <путь>`       | Скачать файл с клиента                             |
-| `upload <файл>`         | Загрузить файл на клиент                           |
-| `screenshot` / `screen` | Снять скриншот и сохранить на сервере              |
-| `wallpaper <файл>`      | Установить обои (Windows / macOS / Linux GNOME)    |
-| `speak <текст>`         | Воспроизвести текст через TTS                      |
-| `<команда>`             | Выполнить произвольную shell-команду               |
-| `q`                     | Вернуться к выбору клиента                         |
+| `info`                  | Username, hostname, MAC address, system time     |
+| `ls [path]`             | Directory contents                              |
+| `cd <path>`             | Change working directory                         |
+| `download <path>`       | Download a file from the client                             |
+| `upload <file>`         | Upload a file to the client                           |
+| `screenshot` / `screen` | Take a screenshot and save to server              |
+| `wallpaper <file>`      | Set wallpaper (Windows / macOS / Linux GNOME)    |
+| `speak <text>`          | Reproduce text via TTS                      |
+| `<command>`             | Execute an arbitrary shell command               |
+| `q`                     | Return to client selection                         |
 
 ---
 
-## Структура проекта
+## Project Structure
 
 ```
 cmd/
-  server/          — точка входа сервера
-  client/          — точка входа клиента (платформо-зависимая инициализация)
+  server/          — server entry point
+  client/          — client entry point (platform-dependent initialization)
 internal/
-  server/          — TLS listener, пул клиентов, CLI оператора
-  client/          — подключение, диспетчер команд, персистентность
-  protocol/        — надёжная сериализация сообщений, передача файлов
-  system/          — сбор системной информации
+  server/          — TLS listener, client pool, operator CLI
+  client/          — connection, command dispatcher, persistence
+  protocol/        — reliable message serialization, file transfer
+  system/          — system information collection
 ```
 
 
@@ -98,20 +98,20 @@ internal/
 
 ---
 
-## TLS и модель угроз
+## TLS and Threat Model
 
-Сервер при каждом запуске генерирует ephemeral ECDSA P-256 сертификат в памяти — без файлов, без CA. Клиент подключается с `InsecureSkipVerify: true`, то есть не проверяет цепочку доверия сертификата.
+The server generates an ephemeral ECDSA P-256 certificate in memory on each run — no files, no CA. The client connects with `InsecureSkipVerify: true`, meaning it does not verify the certificate chain.
 
-Это осознанный компромисс, приемлемый для данного use case:
+This is a deliberate trade-off, acceptable for this use case:
 
-- **Цель TLS здесь — шифрование трафика**, а не аутентификация сервера. Соединение защищено от пассивного перехвата (DPI, сетевые снифферы, Windows Defender Network Inspection).
-- **MITM не входит в модель угроз.** Клиент уже знает адрес сервера, вшитый на этапе компиляции. Инфраструктура предполагает, что между клиентом и сервером нет враждебного посредника — это собственная управляемая среда.
-- **PKI-инфраструктура избыточна.** Создание CA, подписанных сертификатов и их ротация — значительные операционные издержки, которые не дают реального выигрыша в безопасности при данной схеме развёртывания (один сервер, клиент с захардкоженным адресом).
+- **The purpose of TLS here is traffic encryption**, not server authentication. The connection is protected against passive interception (DPI, network sniffers, Windows Defender Network Inspection).
+- **MITM is not in the threat model.** The client already knows the server address hardcoded at compile time. The infrastructure assumes there is no hostile intermediary between client and server — it's a managed environment of your own.
+- **PKI infrastructure is redundant.** Creating a CA, signing certificates, and rotating them — significant operational overhead that provides no real security benefit in this deployment scheme (single server, client with hardcoded address).
 
-Если модель угроз изменится (публичная инфраструктура, несколько операторов) — правильное решение: certificate pinning на стороне клиента с fingerprint сертификата, вшитым при компиляции.
+If the threat model changes (public infrastructure, multiple operators) — the correct solution: certificate pinning on the client side with the certificate fingerprint hardcoded at compile time.
 
 ---
 
-## Правовая оговорка
+## Legal Notice
 
-Данный инструмент разработан в образовательных целях и для использования исключительно на устройствах, которыми вы владеете или на управление которыми имеете явное письменное разрешение. Несанкционированный доступ к чужим системам является уголовно наказуемым деянием в большинстве юрисдикций. Автор не несёт ответственности за любое использование данного ПО в противоправных целях.
+This tool is developed for educational purposes and for use exclusively on devices that you own or have explicit written permission to manage. Unauthorized access to other people's systems is a criminal offense in most jurisdictions. The author is not responsible for any use of this software for illegal purposes.
