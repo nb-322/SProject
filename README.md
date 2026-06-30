@@ -1,4 +1,4 @@
-# SnorkProject
+# SProject
 
 A cross-platform Remote Access Tool with traffic encryption, remote file system management, screenshot capture, and persistence mechanism. Written in Go from scratch without using third-party RAT frameworks.
 
