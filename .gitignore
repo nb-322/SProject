@@ -13,6 +13,9 @@ sshID*
 id_rsa*
 id_ed25519*
 
+# Claude
+CLAUDE.md
+
 # Test/temp files
 satan.png
 satan_upload_result.png
